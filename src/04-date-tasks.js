@@ -19,8 +19,8 @@
  *    'Tue, 26 Jan 2016 13:48:02 GMT' => Date()
  *    'Sun, 17 May 1998 03:00:00 GMT+01' => Date()
  */
-function parseDataFromRfc2822(/* value */) {
-  throw new Error('Not implemented');
+function parseDataFromRfc2822(value) {
+  return new Date(value);
 }
 
 /**
@@ -34,8 +34,8 @@ function parseDataFromRfc2822(/* value */) {
  *    '2016-01-19T16:07:37+00:00'    => Date()
  *    '2016-01-19T08:07:37Z' => Date()
  */
-function parseDataFromIso8601(/* value */) {
-  throw new Error('Not implemented');
+function parseDataFromIso8601(value) {
+  return new Date(value);
 }
 
 
@@ -53,8 +53,10 @@ function parseDataFromIso8601(/* value */) {
  *    Date(2012,1,1)    => true
  *    Date(2015,1,1)    => false
  */
-function isLeapYear(/* date */) {
-  throw new Error('Not implemented');
+function isLeapYear(date) {
+  return (((date.getFullYear() % 4 === 0) && (date.getFullYear() % 100 !== 0))
+        || ((date.getFullYear() % 4 === 0) && (date.getFullYear() % 100 === 0)
+              && (date.getFullYear() % 400 === 0)));
 }
 
 
@@ -73,10 +75,24 @@ function isLeapYear(/* date */) {
  *    Date(2000,1,1,10,0,0),  Date(2000,1,1,10,0,0,250)     => "00:00:00.250"
  *    Date(2000,1,1,10,0,0),  Date(2000,1,1,15,20,10,453)   => "05:20:10.453"
  */
-function timeSpanToString(/* startDate, endDate */) {
-  throw new Error('Not implemented');
+function timeSpanToString(startDate, endDate) {
+  function addZero(n) {
+    return (n < 10) ? `0${n}` : n;
+  }
+  function addMiliZero(n) {
+    if (n < 10) {
+      return `00${n}`;
+    } if (n < 100) {
+      return `0${n}`;
+    }
+    return n;
+  }
+  const hours = addZero(endDate.getHours() - startDate.getHours());
+  const mins = addZero(endDate.getMinutes() - startDate.getMinutes());
+  const secs = addZero(endDate.getSeconds() - startDate.getSeconds());
+  const milsecs = addMiliZero(endDate.getMilliseconds() - startDate.getMilliseconds());
+  return `${hours}:${mins}:${secs}.${milsecs}`;
 }
-
 
 /**
  * Returns the angle (in radians) between the hands of an analog clock
@@ -94,8 +110,12 @@ function timeSpanToString(/* startDate, endDate */) {
  *    Date.UTC(2016,3,5,18, 0) => Math.PI
  *    Date.UTC(2016,3,5,21, 0) => Math.PI/2
  */
-function angleBetweenClockHands(/* date */) {
-  throw new Error('Not implemented');
+function angleBetweenClockHands(date) {
+  const angle = ((0.5 * (date.getUTCHours() * 60 - date.getUTCMinutes() * 11)) % 360);
+  if (angle > 270) {
+    return (360 - angle) * (Math.PI / 180);
+  }
+  return (angle > 180) ? (angle - 180) * (Math.PI / 180) : angle * (Math.PI / 180);
 }
 
 
