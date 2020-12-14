@@ -118,34 +118,592 @@ function fromJSON(proto, json) {
  *  For more examples see unit tests.
  */
 
+// const cssSelectorBuilder = {
+//   element(/* value */) {
+//     throw new Error('Not implemented');
+//   },
+
+//   id(/* value */) {
+//     throw new Error('Not implemented');
+//   },
+
+//   class(/* value */) {
+//     throw new Error('Not implemented');
+//   },
+
+//   attr(/* value */) {
+//     throw new Error('Not implemented');
+//   },
+
+//   pseudoClass(/* value */) {
+//     throw new Error('Not implemented');
+//   },
+
+//   pseudoElement(/* value */) {
+//     throw new Error('Not implemented');
+//   },
+
+//   combine(/* selector1, combinator, selector2 */) {
+//     throw new Error('Not implemented');
+//   },
+// };
+
+
+const ORDER = ['element', 'id', 'class', 'attribute', 'pseudoClass', 'pseudoElement'];
+
+function Element(name) {
+  this.selectors = `${name}`;
+  this.currentSelector = 'element';
+  this.prevSelector = null;
+  this.elementCount = 1;
+  this.idCount = 0;
+  this.pseudoElemCount = 0;
+
+  this.element = function (value) {
+    if (this.elementCount > 0) {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    }
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'element';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `${value}`;
+    return this;
+  };
+
+  this.id = function (value) {
+    if (this.idCount > 0) {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    }
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'id';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `#${value}`;
+    this.idCount += 1;
+    return this;
+  };
+
+  this.class = function (value) {
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'class';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `.${value}`;
+    return this;
+  };
+
+  this.attr = function (value) {
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'attribute';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `[${value}]`;
+    return this;
+  };
+
+  this.pseudoClass = function (value) {
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'pseudoClass';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `:${value}`;
+    return this;
+  };
+
+  this.pseudoElement = function (value) {
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'pseudoElement';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    if (this.pseudoElemCount > 0) {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    }
+    this.pseudoElemCount += 1;
+    this.selectors += `::${value}`;
+    return this;
+  };
+
+  this.stringify = function () {
+    return this.selectors;
+  };
+}
+
+function Id(name) {
+  this.selectors = `#${name}`;
+  this.currentSelector = 'id';
+  this.prevSelector = null;
+  this.elementCount = 0;
+  this.idCount = 1;
+  this.pseudoElemCount = 0;
+
+  this.element = function (value) {
+    if (this.elementCount > 0) {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    }
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'element';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `${value}`;
+    return this;
+  };
+
+  this.id = function (value) {
+    if (this.idCount > 0) {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    }
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'id';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `#${value}`;
+    this.idCount += 1;
+    return this;
+  };
+
+  this.class = function (value) {
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'class';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `.${value}`;
+    return this;
+  };
+
+  this.attr = function (value) {
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'attribute';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `[${value}]`;
+    return this;
+  };
+
+  this.pseudoClass = function (value) {
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'pseudoClass';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `:${value}`;
+    return this;
+  };
+
+  this.pseudoElement = function (value) {
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'pseudoElement';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    if (this.pseudoElemCount > 0) {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    }
+    this.pseudoElemCount += 1;
+    this.selectors += `::${value}`;
+    return this;
+  };
+
+  this.stringify = function () {
+    return this.selectors;
+  };
+}
+
+function Class(name) {
+  this.selectors = `.${name}`;
+  this.currentSelector = 'class';
+  this.prevSelector = null;
+  this.elementCount = 0;
+  this.idCount = 0;
+  this.pseudoElemCount = 0;
+
+  this.element = function (value) {
+    if (this.elementCount > 0) {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    }
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'element';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `${value}`;
+    return this;
+  };
+
+  this.id = function (value) {
+    if (this.idCount > 0) {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    }
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'id';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `#${value}`;
+    this.idCount += 1;
+    return this;
+  };
+
+  this.class = function (value) {
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'class';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `.${value}`;
+    return this;
+  };
+
+  this.attr = function (value) {
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'attribute';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `[${value}]`;
+    return this;
+  };
+
+  this.pseudoClass = function (value) {
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'pseudoClass';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `:${value}`;
+    return this;
+  };
+
+  this.pseudoElement = function (value) {
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'pseudoElement';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    if (this.pseudoElemCount > 0) {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    }
+    this.pseudoElemCount += 1;
+    this.selectors += `::${value}`;
+    return this;
+  };
+
+  this.stringify = function () {
+    return this.selectors;
+  };
+}
+
+function Attr(name) {
+  this.selectors = `[${name}]`;
+  this.currentSelector = 'attribute';
+  this.prevSelector = null;
+  this.elementCount = 0;
+  this.idCount = 0;
+  this.pseudoElemCount = 0;
+
+  this.element = function (value) {
+    if (this.elementCount > 0) {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    }
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'element';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `${value}`;
+    return this;
+  };
+
+  this.id = function (value) {
+    if (this.idCount > 0) {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    }
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'id';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `#${value}`;
+    this.idCount += 1;
+    return this;
+  };
+
+  this.class = function (value) {
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'class';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `.${value}`;
+    return this;
+  };
+
+  this.attr = function (value) {
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'attribute';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `[${value}]`;
+    return this;
+  };
+
+  this.pseudoClass = function (value) {
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'pseudoClass';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `:${value}`;
+    return this;
+  };
+
+  this.pseudoElement = function (value) {
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'pseudoElement';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    if (this.pseudoElemCount > 0) {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    }
+    this.pseudoElemCount += 1;
+    this.selectors += `::${value}`;
+    return this;
+  };
+
+  this.stringify = function () {
+    return this.selectors;
+  };
+}
+
+
+function PseudoClass(name) {
+  this.selectors = `:${name}`;
+  this.currentSelector = 'pseudoClass';
+  this.prevSelector = null;
+  this.elementCount = 0;
+  this.idCount = 0;
+  this.pseudoElemCount = 0;
+
+  this.element = function (value) {
+    if (this.elementCount > 0) {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    }
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'element';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `${value}`;
+    return this;
+  };
+
+  this.id = function (value) {
+    if (this.idCount > 0) {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    }
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'id';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `#${value}`;
+    this.idCount += 1;
+    return this;
+  };
+
+  this.class = function (value) {
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'class';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `.${value}`;
+    return this;
+  };
+
+  this.attr = function (value) {
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'attribute';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `[${value}]`;
+    return this;
+  };
+
+  this.pseudoClass = function (value) {
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'pseudoClass';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `:${value}`;
+    return this;
+  };
+
+  this.pseudoElement = function (value) {
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'pseudoElement';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    if (this.pseudoElemCount > 0) {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    }
+    this.pseudoElemCount += 1;
+    this.selectors += `::${value}`;
+    return this;
+  };
+
+  this.stringify = function () {
+    return this.selectors;
+  };
+}
+
+
+function PseudoElement(name) {
+  this.selectors = `::${name}`;
+  this.currentSelector = 'pseudoElement';
+  this.prevSelector = null;
+  this.elementCount = 0;
+  this.idCount = 0;
+  this.pseudoElemCount = 1;
+
+  this.element = function (value) {
+    if (this.elementCount > 0) {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    }
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'element';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `${value}`;
+    return this;
+  };
+
+  this.id = function (value) {
+    if (this.idCount > 0) {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    }
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'id';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `#${value}`;
+    this.idCount += 1;
+    return this;
+  };
+
+  this.class = function (value) {
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'class';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `.${value}`;
+    return this;
+  };
+
+  this.attr = function (value) {
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'attribute';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `[${value}]`;
+    return this;
+  };
+
+  this.pseudoClass = function (value) {
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'pseudoClass';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.selectors += `:${value}`;
+    return this;
+  };
+
+  this.pseudoElement = function (value) {
+    this.prevSelector = this.currentSelector;
+    this.currentSelector = 'pseudoElement';
+    if (ORDER.indexOf(this.prevSelector) > ORDER.indexOf(this.currentSelector)) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    if (this.pseudoElemCount > 0) {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    }
+    this.pseudoElemCount += 1;
+    this.selectors += `::${value}`;
+    return this;
+  };
+
+  this.stringify = function () {
+    return this.selectors;
+  };
+}
+
+
+class Combine {
+  constructor(selector1, combinator, selector2) {
+    this.string = `${selector1.stringify()} ${combinator} ${selector2.stringify()}`;
+  }
+
+  stringify() {
+    return this.string;
+  }
+}
+
+
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
+
+
+  element(value) {
+    const elem = new Element(value);
+    return elem;
+  },
+  id(value) {
+    const elem = new Id(value);
+    return elem;
+  },
+  class(value) {
+    const elem = new Class(value);
+    return elem;
   },
 
-  id(/* value */) {
-    throw new Error('Not implemented');
+  attr(value) {
+    const elem = new Attr(value);
+    return elem;
   },
 
-  class(/* value */) {
-    throw new Error('Not implemented');
+  pseudoClass(value) {
+    const elem = new PseudoClass(value);
+    return elem;
   },
 
-  attr(/* value */) {
-    throw new Error('Not implemented');
+  pseudoElement(value) {
+    const elem = new PseudoElement(value);
+    return elem;
   },
 
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  combine(selector1, combinator, selector2) {
+    return new Combine(selector1, combinator, selector2);
   },
 
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
-  },
-
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
-  },
 };
 
 
